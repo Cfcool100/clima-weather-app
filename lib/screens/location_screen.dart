@@ -1,3 +1,4 @@
+import 'package:clima/screens/city_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:clima/utilities/constants.dart';
 import 'package:clima/services/weather.dart';
@@ -27,7 +28,7 @@ class _LocationScreenState extends State<LocationScreen> {
   void displayData(dynamic decode) {
     setState(() {
       cityName = decode['name'];
-      int condition = decode['weather'][0]['id'];
+      var condition = decode['weather'][0]['id'];
       weatherIcon = weatherModel.getWeatherIcon(condition);
       temperature = decode['main']['temp'];
       message = weatherModel.getMessage(temperature!.toInt());
@@ -56,14 +57,29 @@ class _LocationScreenState extends State<LocationScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
                   TextButton(
-                    onPressed: () {},
+                    onPressed: () async {
+                      var weatherData = await weatherModel.getLocationData();
+                      displayData(weatherData);
+                    },
                     child: Icon(
                       Icons.near_me,
                       size: 40.0,
                     ),
                   ),
                   TextButton(
-                    onPressed: () {},
+                    onPressed: () async {
+                      var typeName = await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => CityScreen(),
+                        ),
+                      );
+                      if (typeName != null) {
+                        var weather = await weatherModel
+                            .getCityWeather(typeName.toString());
+                        displayData(weather);
+                      }
+                    },
                     child: Icon(
                       Icons.location_city,
                       size: 40.0,
@@ -76,7 +92,7 @@ class _LocationScreenState extends State<LocationScreen> {
                 child: Row(
                   children: <Widget>[
                     Text(
-                      '${temperature?.round()}°',
+                      '${temperature?.toInt()}°',
                       style: kTempTextStyle,
                     ),
                     Text(
